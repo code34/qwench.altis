@@ -18,6 +18,8 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 	*/
 
+	#include "oop.h"
+
 	private _db_inisection		= "Database";
 	private _db_databasename 	= "extdb3";
 	private _db_sqltype		= "SQL";
@@ -33,7 +35,7 @@
 	diag_log "---------------------------------- INITIALIZE DATABASE  -----------------------------------";
 	diag_log "----------------------------------------------------------------------------------------------------";
 	
-	private _extdb3 = "new" call OO_EXTDB3;
+	private _extdb3 = NEW(OO_EXTDB3, nil);
 	_result = "isDllEnabled" call _extdb3;
 	if!(_result) exitWith { 
 		hintc "QWENCH: extdb3 addon load failed";
@@ -54,7 +56,7 @@
 	diag_log "---------------------------------- INITIALIZE BUS MESSAGE--------------------------------";
 	diag_log "----------------------------------------------------------------------------------------------------";
 	
-	if((isServer) and (isDedicated)) then { qwench_bmeserver = "new" call OO_BME; };
+	if((isServer) and (isDedicated)) then { qwench_bmeserver = NEW(OO_BME, nil);};
 	qwenchIsAlive = { true;};
 
 	diag_log "----------------------------------------------------------------------------------------------------";

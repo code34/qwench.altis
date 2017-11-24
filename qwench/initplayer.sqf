@@ -18,6 +18,8 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 	*/
 
+	#include "oop.h"
+
 	diag_log "----------------------------------------------------------------------------------------------------";
 	diag_log "---------------------------------- QWENCH CLIENT INIT ------------------------------------";
 	diag_log "----------------------------------------------------------------------------------------------------";
@@ -28,14 +30,12 @@
 	diag_log "---------------------------------- INITIALIZE BUS MESSAGE--------------------------------";
 	diag_log "----------------------------------------------------------------------------------------------------";
 
-	qwench_bmeclient = "new" call OO_BME;
+	qwench_bmeclient = NEW(OO_BME, nil);
 
 	private _result = false;
-	private _count = 0;
 	while { _result isEqualTo false} do { 
 		_result= ["remoteCall", ["qwenchIsAlive", "" , 2, false]] call qwench_bmeclient;
 		sleep 0.1;
-		_count = _count + 1;
 	};
 
 	diag_log "----------------------------------------------------------------------------------------------------";
