@@ -21,6 +21,7 @@
 	#include "oop.h"
 
 	CLASS("OO_BME")
+		PRIVATE VARIABLE("code","this");
 		PRIVATE VARIABLE("array","sendspawnqueue");
 		PRIVATE VARIABLE("array","sendcallqueue");
 		PRIVATE VARIABLE("array","receivespawnqueue");
@@ -28,6 +29,7 @@
 		PRIVATE VARIABLE("array","receiveloopbackqueue");
 		PRIVATE VARIABLE("scalar","transactid");
 		PRIVATE VARIABLE("scalar","callreleasetime");
+		PRIVATE VARIABLE("array","handlers");
 		
 		PUBLIC FUNCTION("","constructor") {
 			DEBUG(#, "OO_BME::constructor")
@@ -39,24 +41,25 @@
 			MEMBER("transactid", 0);
 			MEMBER("callreleasetime", 3);
 			MEMBER("declareHandler", nil);
+			MEMBER("handlers", []);
 
-			["runReceiveCallQueue", 0.05] spawn _self;
-			["runReceiveSpawnQueue", 0.05] spawn _self;
-			["runSendCallQueue", 0.05] spawn _self;
-			["runSendSpawnQueue", 0.05] spawn _self;
+			MEMBER("handlers", nil) pushBack (["runReceiveCallQueue", 0.05] spawn MEMBER("this", nil));
+			MEMBER("handlers", nil) pushBack (["runReceiveSpawnQueue", 0.05] spawn MEMBER("this", nil));
+			MEMBER("handlers", nil) pushBack (["runSendCallQueue", 0.05] spawn MEMBER("this", nil));
+			MEMBER("handlers", nil) pushBack (["runSendSpawnQueue", 0.05] spawn MEMBER("this", nil));
 		};
 
 		PUBLIC FUNCTION("","declareHandler") {
 			DEBUG(#, "OO_BME::declareHandler")
-			bme_client_handlers = _self;
+			bme_handlers = MEMBER("this", nil);
 			"bme_add_spawnqueue" addPublicVariableEventHandler {
-				["addReceiveSpawnQueue", _this select 1] call bme_client_handlers;
+				["addReceiveSpawnQueue", _this select 1] call bme_handlers;
 			};
 			"bme_add_callqueue" addPublicVariableEventHandler {
-				["addReceiveCallQueue", _this select 1] call bme_client_handlers;
+				["addReceiveCallQueue", _this select 1] call bme_handlers;
 			};
 			"bme_add_loopback" addPublicVariableEventHandler {
-				["addReceiveLoopbackQueue", _this select 1] call bme_client_handlers;
+				["addReceiveLoopbackQueue", _this select 1] call bme_handlers;
 			};
 		};
 
@@ -73,14 +76,16 @@
 			private _targetid 		= _this select 2;
 			private _defaultreturn		= param [3, []];
 			private _transactid 		= (MEMBER("transactid", nil) + 1);
+			private _log 			= "";
 			if(_transactid > 99) then { _transactid = 0;};
 			MEMBER("transactid", _transactid);
 
 			if!(_remotefunction isEqualType "") exitwith { MEMBER("log", "BME: wrong type variablename parameter, should be STRING"); false; };
-			if(isnil "_parameters") exitwith { MEMBER("log", format["BME:  parameters data for %1 handler is nil", _remotefunction]); false; };
+			if(isnil "_parameters") exitwith { _log = format["BME:  parameters data for %1 handler is nil", _remotefunction]; MEMBER("log", _log); false; };
 			if(isNil "_targetid") exitwith {MEMBER("log", "BME: Client targetID must be define"); false; };
 
 			private _array= [_transactid, _defaultreturn]; 
+
 			MEMBER("sendcallqueue", nil) pushBack [_remotefunction, _parameters, clientOwner, _targetid, _transactid];
 			MEMBER("getLoopBackReturn", _array);
 		};
@@ -135,7 +140,6 @@
 		// _sourceid = _this select 1
 		// _return = _this select ;
 		PUBLIC FUNCTION("array","addReceiveLoopBackQueue") {
-			diag_log format ["%1 %2", time, _this];
 			DEBUG(#, "OO_BME::addReceiveLoopBackQueue")
 			MEMBER("receiveloopbackqueue", nil) pushBack _this;
 		};
@@ -152,6 +156,7 @@
 			private _transactid = 0;
 			private _code = nil;
 			private _array = [];
+			private _log = "";
 
 			while { true } do {
 				_message = MEMBER("receivecallqueue", nil) deleteAt 0;
@@ -162,12 +167,13 @@
 					_transactid		= _message select 4;
 					_code 			= nil;
 					
-					_code = missionNamespace getVariable _remotefunction;
+					_code = missionNamespace getVariable _remotefunction;				
 					if!(isnil "_code") then {
 						bme_add_loopback = [_transactid, _sourceid, (_parameters call _code)];
 						_sourceid publicVariableClient "bme_add_loopback";
 					} else {
-						MEMBER("log", format["BME: server handler function for %1 doesnt exist", _remotefunction]);
+						_log = format["BME: server handler function for %1 doesnt exist", _remotefunction];
+						MEMBER("log", _log);
 					};
 				};
 				uiSleep _parsingtime;
@@ -208,9 +214,10 @@
 			private _parameters 		=  _this select 1;
 			private _destination		= tolower(_this select 2);
 			private _targetid 		= _this select 3;
+			private _log			= "";
 			
 			if!(_remotefunction isEqualType "") exitwith { MEMBER("log", "BME: wrong type variablename parameter, should be STRING"); false; };
-			if(isnil "_parameters") exitwith { MEMBER("log", format["BME:  parameters data for %1 handler is nil", _remotefunction]); false; };
+			if(isnil "_parameters") exitwith { _log = format["BME:  parameters data for %1 handler is nil", _remotefunction];MEMBER("log", _log); false; };
 			if!(_destination isEqualType "") exitwith { MEMBER("log", "BME: wrong type destination parameter, should be STRING"); false; };
 			if!(_destination in ["client", "server", "all"]) exitwith {MEMBER("log", "BME: wrong destination parameter should be client|server|all"); false; };
 			
@@ -253,6 +260,7 @@
 			private _destination = "";
 			private _targetid = 0;
 			private _code = nil;
+			private _log = "";
 
 			while { true } do {
 				_message = MEMBER("receivespawnqueue", nil) deleteAt 0;
@@ -271,7 +279,8 @@
 						if!(isnil "_code") then {
 							_parameters spawn _code;
 						} else {
-							MEMBER("log", format["BME: server handler function for %1 doesnt exist", _remotefunction]);
+							_log = format["BME: server handler function for %1 doesnt exist", _remotefunction];
+							MEMBER("log", _log);
 						};
 					};
 
@@ -280,7 +289,8 @@
 						if!(isnil "_code") then {
 							_parameters spawn _code;
 						} else {
-							MEMBER("log", format["BME: client handler function for %1 doesnt exist", _remotefunction]);
+							_log = format["BME: client handler function for %1 doesnt exist", _remotefunction];
+							MEMBER("log", _log);
 						};
 					};
 				};
@@ -323,12 +333,15 @@
 
 		PUBLIC FUNCTION("string","log") {
 			DEBUG(#, "OO_BME::log")
-			hint format["%1", _this];
+			hintc format["%1", _this];
 			diag_log format["%1", _this];
 		};
 
 		PUBLIC FUNCTION("","deconstructor") { 
 			DEBUG(#, "OO_BME::deconstructor")
+			{ terminate _x; } foreach MEMBER("handlers", nil);
+			DELETE_VARIABLE("handlers");
+			DELETE_VARIABLE("this");
 			DELETE_VARIABLE("transactid");
 			DELETE_VARIABLE("sendspawnqueue");
 			DELETE_VARIABLE("sendcallqueue");
