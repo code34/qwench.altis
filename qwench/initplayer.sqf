@@ -35,7 +35,6 @@
 	while { _result isEqualTo false} do { 
 		_result= ["remoteCall", ["qwenchIsAlive", "" , 2, false]] call qwench_bmeclient;
 		sleep 0.1;
-		//hint format ["resultat: %1 %2", _result, _count];
 		_count = _count + 1;
 	};
 

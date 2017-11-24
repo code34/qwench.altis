@@ -333,7 +333,7 @@
 
 		PUBLIC FUNCTION("string","log") {
 			DEBUG(#, "OO_BME::log")
-			hintc format["%1", _this];
+			hint format["%1", _this];
 			diag_log format["%1", _this];
 		};
 
