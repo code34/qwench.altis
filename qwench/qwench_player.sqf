@@ -18,7 +18,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 	*/
 
-	#include "oop.h"
+	#include "objects\oop.h"
 
 	diag_log "----------------------------------------------------------------------------------------------------";
 	diag_log "---------------------------------- QWENCH CLIENT INIT ------------------------------------";

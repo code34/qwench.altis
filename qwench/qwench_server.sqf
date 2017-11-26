@@ -18,11 +18,8 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 	*/
 
-	#include "oop.h"
-
-	private _db_inisection		= "Database";
-	private _db_databasename 	= "extdb3";
-	private _db_sqltype		= "SQL";
+	#include "objects\oop.h"
+	#include "qwench_config.sqf"
 
 	diag_log "----------------------------------------------------------------------------------------------------";
 	diag_log "---------------------------------- QWENCH SERVER INIT -----------------------------------";
@@ -46,6 +43,7 @@
 	["setDatabaseName", _db_databasename] call _extdb3;
 	["setQueryType", _db_sqltype] call _extdb3;
 	_result = "connect" call _extdb3;
+	qwench_extdb3 = _extdb3;
 
 	if!(_result) exitWith { 
 		hintc "QWENCH INIT DB FAILED - check DB is ON or DB credentials";
