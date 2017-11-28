@@ -30,11 +30,11 @@
 	diag_log "---------------------------------- INITIALIZE BUS MESSAGE--------------------------------";
 	diag_log "----------------------------------------------------------------------------------------------------";
 
-	qwench_bmeclient = NEW(OO_BME, nil);
+	qwench_bme = NEW(OO_BME, nil);
 
 	private _result = false;
 	while { _result isEqualTo false} do { 
-		_result= ["remoteCall", ["qwenchIsAlive", "" , 2, false]] call qwench_bmeclient;
+		_result= ["remoteCall", ["qwenchIsAlive", "" , 2, false]] call qwench_bme;
 		sleep 0.1;
 	};
 

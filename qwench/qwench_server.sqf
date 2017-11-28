@@ -54,7 +54,7 @@
 	diag_log "---------------------------------- INITIALIZE BUS MESSAGE--------------------------------";
 	diag_log "----------------------------------------------------------------------------------------------------";
 	
-	if((isServer) and (isDedicated)) then { qwench_bmeserver = NEW(OO_BME, nil);};
+	if((isServer) and (isDedicated)) then { qwench_bme = NEW(OO_BME, nil);};
 	qwenchIsAlive = { true;};
 
 	diag_log "----------------------------------------------------------------------------------------------------";
