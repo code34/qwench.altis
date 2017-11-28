@@ -5,4 +5,4 @@
 	hint "QWENCH Init is done and fully usable";
 
 	//private _params = [currentWeapon player, damage player];
-	//_result= ["remoteCall", ["setWeapon", _params, 2, false]] call qwench_bmeclient;
+	//_result= ["remoteCall", ["setWeapon", _params, 2, false]] call qwench_bme;
