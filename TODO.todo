@@ -1,0 +1,15 @@
+Qwench @started(19-11-17 18:43)
+Gui:
+  Objet qui permet de gérer les interfaces de façon générique.
+  ☐ @high Code générique pour commencer rapidement à créer des objets interface et permettre d'ajouter des methodes à partir d'un UI editor
+Log:
+ ☐ @low Objet qui fait du log de type
+   	diag_log "----------------------------------------------------------------------------------------------------";
+  	diag_log "---------------------------------- QWENCH SERVER INIT -----------------------------------";
+  	diag_log "----------------------------------------------------------------------------------------------------";
+Archive:
+  ✔This todo was written with Plain Task Sublime module @done (17-12-17 18:37) @project(Log / Todo)
+
+
+
+ 
