@@ -20,25 +20,19 @@
 
 	#include "objects\oop.h"
 
-	diag_log "----------------------------------------------------------------------------------------------------";
-	diag_log "---------------------------------- QWENCH CLIENT INIT ------------------------------------";
-	diag_log "----------------------------------------------------------------------------------------------------";
-
 	call compile preprocessFileLineNumbers "qwench\objects\oo_bme.sqf";
+	call compile preprocessFileLineNumbers "qwench\objects\oo_log.sqf";
 
-	diag_log "----------------------------------------------------------------------------------------------------";
-	diag_log "---------------------------------- INITIALIZE BUS MESSAGE--------------------------------";
-	diag_log "----------------------------------------------------------------------------------------------------";
+	private _log = NEW(OO_LOG, nil);
+	["log", "CLIENT INIT"] call _log;
+	["log", "INITIALIZE BUS MESSAGE"] call _log;
 
 	qwench_bme = NEW(OO_BME, nil);
-
 	private _result = false;
 	while { _result isEqualTo false} do { 
 		_result= ["remoteCall", ["qwenchIsAlive", "" , 2, false]] call qwench_bme;
 		sleep 0.1;
 	};
 
-	diag_log "----------------------------------------------------------------------------------------------------";
-	diag_log "---------------------------------- QWENCH CLIENT SUCCESS -----------------------------";
-	diag_log "----------------------------------------------------------------------------------------------------";
+	["log", "CLIENT INITIALIZATION SUCCESS"] call _log;
 	_result;
