@@ -31,10 +31,10 @@
 	diag_log "----------------------------------------------------------------------------------------------------";
 	diag_log "---------------------------------- INITIALIZE DATABASE  -----------------------------------";
 	diag_log "----------------------------------------------------------------------------------------------------";
-	
+
 	private _extdb3 = NEW(OO_EXTDB3, nil);
 	_result = "isDllEnabled" call _extdb3;
-	if!(_result) exitWith { 
+	if!(_result) exitWith {
 		hintc "QWENCH: extdb3 addon load failed";
 		diag_log "QWENCH: extdb3 addon load failed";
 	};
