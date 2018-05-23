@@ -18,6 +18,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 	*/
 
-	private _db_inisection		= "Database";
-	private _db_databasename 	= "extdb3";
-	private _db_sqltype		= "SQL";
+	private _db_inisection = "Database";
+	private _db_databasename = "extdb3";
+	private _db_sqltype	 = "SQL";
