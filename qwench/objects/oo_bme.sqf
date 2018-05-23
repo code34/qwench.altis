@@ -47,7 +47,6 @@
 			MEMBER("handlers", nil) pushBack (["runReceiveSpawnQueue", 0.05] spawn MEMBER("this", nil));
 			MEMBER("handlers", nil) pushBack (["runSendCallQueue", 0.05] spawn MEMBER("this", nil));
 			MEMBER("handlers", nil) pushBack (["runSendSpawnQueue", 0.05] spawn MEMBER("this", nil));
-			MEMBER("handlers", nil) pushBack ("garbageReceiveLoopBackQueue" spawn MEMBER("this", nil));
 		};
 
 		// Declare connexion handlers
@@ -60,19 +59,19 @@
 
 		// Entry function for remote call
 		// Endpoint for loopback result
-		//	private _remotefunction 	= _this select 0;
-		//	private _parameters 		=  _this select 1;
-		//	private _targetid 		= _this select 3;
-		//	private _defaultreturn		= _this select 4;
+		//	private _remotefunction = _this select 0;
+		//	private _parameters =  _this select 1;
+		//	private _targetid = _this select 3;
+		//	private _defaultreturn = _this select 4;
 		PUBLIC FUNCTION("array","remoteCall") {
 			DEBUG(#, "OO_BME::remoteCall")
-			private _remotefunction 	= _this select 0;
-			private _parameters 		=  _this select 1;
-			private _targetid 		= _this select 2;
-			private _defaultreturn		= param [3, []];
-			private _timeout		= param [4, 3, [0]];
-			private _transactid 		= (MEMBER("transactid", nil) + 1);
-			private _log 			= "";
+			private _remotefunction = _this select 0;
+			private _parameters = _this select 1;
+			private _targetid = _this select 2;
+			private _defaultreturn = param [3, []];
+			private _timeout = param [4, 3, [0]];
+			private _transactid = (MEMBER("transactid", nil) + 1);
+			private _log = "";
 			if(_transactid > 99) then { _transactid = 0;};
 			MEMBER("transactid", _transactid);
 
@@ -101,13 +100,13 @@
 						if!((bme_add_callqueue select 2) isEqualTo (bme_add_callqueue select 3)) then{
 							(bme_add_callqueue select 3) publicvariableclient "bme_add_callqueue";
 						} else {
-							if((local player) and (isserver)) then { MEMBER("addReceiveCallQueue", bme_add_callqueue);	};
+							if((local player) and (isserver)) then { MEMBER("addReceiveCallQueue", bme_add_callqueue); };
 						};
 					};
 				};
 				uiSleep _parsingtime;
 			};
-		};		
+		};
 
 		// function call by addPublicVariableEventHandler
 		// insert message in call queue for server / client
@@ -159,16 +158,21 @@
 			while { true } do {
 				_message = MEMBER("receivecallqueue", nil) deleteAt 0;
 				if(!isnil "_message") then {
-					_remotefunction	= _message select 0;
-					_parameters		= _message select 1;
-					_sourceid		= _message select 2;
-					_transactid		= _message select 4;
-					_code 			= nil;
+					_remotefunction = _message select 0;
+					_parameters = _message select 1;
+					_sourceid = _message select 2;
+					_transactid = _message select 4;
+					_code 	= {};
 
 					_code = missionNamespace getVariable _remotefunction;
 					if!(isnil "_code") then {
-						bme_add_loopback = [_transactid, (_parameters call _code)];
-						_sourceid publicVariableClient "bme_add_loopback";
+						if !(typeName _code isEqualTo "CODE") then {
+							_log = format ["Server receive an unknow remote call: %1", _remotefunction];
+							MEMBER("log", _log);
+						} else {
+							bme_add_loopback = [_transactid, (_parameters call _code)];
+							_sourceid publicVariableClient "bme_add_loopback";
+						};
 					} else {
 						_log = format["Server handler function for %1 doesnt exist", _remotefunction];
 						MEMBER("log", _log);
@@ -202,11 +206,11 @@
 		//  Entry function for remote spawn
 		PUBLIC FUNCTION("array","remoteSpawn") {
 			DEBUG(#, "OO_BME::remoteSpawn")
-			private _remotefunction 	= _this select 0;
-			private _parameters 		=  _this select 1;
-			private _destination		= tolower(_this select 2);
-			private _targetid 		= _this select 3;
-			private _log			= "";
+			private _remotefunction = _this select 0;
+			private _parameters = _this select 1;
+			private _destination = tolower(_this select 2);
+			private _targetid = _this select 3;
+			private _log = "";
 
 			if!(_remotefunction isEqualType "") exitwith { MEMBER("log", "Wrong type variablename parameter, should be STRING"); false; };
 			if(isnil "_parameters") exitwith { _log = format["Parameters data for %1 handler is nil", _remotefunction];MEMBER("log", _log); false; };
@@ -219,7 +223,7 @@
 				MEMBER("sendspawnqueue", nil) pushBack [_remotefunction, _parameters, _destination, _targetid];
 			};
 			true;
-		};		
+		};
 
 		// function call by addPublicVariableEventHandler
 		// insert message in spawn queue for server / client / all
@@ -261,14 +265,19 @@
 					_parameters		= _message select 1;
 					_destination 		= _message select 2;
 					_targetid		= _message select 3;
-					_code 			= nil;
+					_code 			= {};
 
 					if (isNil "_targetid") then { _targetid = 0;};
 
 					if(isserver and ((_destination isEqualTo "server") or (_destination isEqualTo "all"))) then {
 						_code = missionNamespace getVariable _remotefunction;
 						if!(isnil "_code") then {
-							_parameters spawn _code;
+							if !(typeName _code isEqualTo "CODE") then {
+								_log = format ["Server receive an unknow remote spawn: %1", _remotefunction];
+								MEMBER("log", _log);
+							} else {
+								_parameters spawn _code;
+							};
 						} else {
 							_log = format["Server handler function for %1 doesnt exist", _remotefunction];
 							MEMBER("log", _log);
@@ -278,7 +287,12 @@
 					if(local player and ((_destination isEqualTo "client") or (_destination isEqualTo "all"))) then {
 						_code = missionNamespace getVariable _remotefunction;
 						if!(isnil "_code") then {
-							_parameters spawn _code;
+							if !(typeName _code isEqualTo "CODE") then { 
+								_log = format ["Client receive an unknow remote spawn: %1", _remotefunction];
+								MEMBER("log", _log);
+							} else {
+								_parameters spawn _code;
+							};
 						} else {
 							_log = format["Client handler function for %1 doesnt exist", _remotefunction];
 							MEMBER("log", _log);
@@ -322,7 +336,7 @@
 
 		PUBLIC FUNCTION("string","log") {
 			DEBUG(#, "OO_BME::log")
-			hintc format["BME: %1", _this];
+			["BME: %1", _this] call BIS_fnc_error;
 			diag_log format["BME: %1", _this];
 		};
 
