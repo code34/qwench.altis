@@ -18,8 +18,11 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 	*/
 
+	0.2 
+		- Add simple Log class
+		- New Bus Message Version
+		- New Extdb3 Version
+
 	0.1 First Release:
 		- Mysql Database Access
 		- Bus Message Access
-		
-
